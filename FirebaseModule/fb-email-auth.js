@@ -44,6 +44,7 @@ async function testFunction() {
     const fbAuthManager = new FBAuthManager()
     const fbEmailAuth = new FBEmailAuth()
     const loginResult = await fbEmailAuth.loginUser('test@test.com', '123456')
+    console.log(loginResult)
     const uid = await fbAuthManager.verifyTokenAndGetUID(loginResult)
     console.log(uid)
 }
