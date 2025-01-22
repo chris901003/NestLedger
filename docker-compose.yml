@@ -1,0 +1,41 @@
+services:
+  NestLedgerMongoDB:
+    image: mongo:6.0.4
+    container_name: NestLedgerMongoDB
+    ports:
+      - "27018:27017"
+    networks:
+      - ngnix_network
+    volumes:
+      - NestLedgerVolume:/data/db
+    command: --auth
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGODB_ADMIN_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGODB_ADMIN_PASS}
+      MONGO_INITDB_DATABASE: NestLedgerDB
+  
+  NestLedgerMongoExpress:
+    image: mongo-express
+    ports:
+      - "8082:8081"
+    networks:
+      - ngnix_network
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: ${MONGODB_ADMIN_USER}
+      ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGODB_ADMIN_PASS}
+      ME_CONFIG_BASICAUTH_USERNAME: ${MONGO_EXPRESS_WEB_USER}
+      ME_CONFIG_BASICAUTH_PASSWORD: ${MONGO_EXPRESS_WEB_PASS}
+      ME_CONFIG_MONGODB_SERVER: NestLedgerMongoDB
+      ME_CONFIG_MONGODB_URL: mongodb://${MONGODB_ADMIN_USER}:${MONGODB_ADMIN_PASS}@NestLedgerMongoDB:27017?authSource=admin
+
+volumes:
+  NestLedgerVolume:
+    driver: local
+    driver_opts:
+      type: none
+      device: ${MONGODB_VOLUME_PATH}
+      o: bind
+
+networks:
+  ngnix_network:
+    external: true
