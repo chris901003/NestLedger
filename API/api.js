@@ -16,6 +16,7 @@ class APIManager {
     constructor() {
         this.app = express()
         this.#generateAPI()
+        this.#createTestAPI()
         this.#startServer()
     }
 
@@ -30,6 +31,12 @@ class APIManager {
         authVerify(this.app)
 
         this.app.use('/user', UserRouter())
+    }
+
+    #createTestAPI() {
+        this.app.get('/', (req, res) => {
+            res.send('Welcome to NestLedger API')
+        })
     }
 }
 

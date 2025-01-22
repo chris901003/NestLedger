@@ -10,7 +10,7 @@
 
 import { FBAuthManager } from "../FirebaseModule/fb-auth.js"
 
-const whiteList = []
+const whiteList = ['/']
 
 export const authVerify = (app) => {
     app.use((req, res, next) => {
