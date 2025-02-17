@@ -9,6 +9,7 @@
 */
 
 import express, { Request, Response } from 'express'
+import { authVerify } from './auth-verify'
 import { UserRouter } from './user-router'
 
 class APIManager {
@@ -27,6 +28,9 @@ class APIManager {
     }
 
     #generateAPI() {
+        this.app.use(express.json())
+        authVerify(this.app)
+        
         this.app.use('/user', UserRouter())
     }
 

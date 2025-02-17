@@ -26,7 +26,7 @@ class FBAuthVerifyResult {
 }
 
 class FBAuthManager {
-    async verifyTokenAndGetUid(token: string) {
+    async verifyTokenAndGetUid(token: string): Promise<FBAuthVerifyResult> {
         try {
             const decodedToken = await admin.auth().verifyIdToken(token)
             return new FBAuthVerifyResult(true, decodedToken.uid)
