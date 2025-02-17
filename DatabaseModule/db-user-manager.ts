@@ -8,7 +8,7 @@
  * =============================================================================
 */
 
-import mongoose from './db-connect.ts'
+import mongoose from './db-connect'
 import { Schema, Document, model, InferSchemaType } from 'mongoose'
 
 // UserInfoManager Error Types
@@ -51,7 +51,7 @@ class DBUserInfoManager {
         let userInfo: IUserInfo | null = null
         try {
             userInfo = await this.UserInfoModel.findOne({ id: uid }).lean()
-        } catch (error) {
+        } catch (error: Error | any) {
             throw new DBUserInfoManagerError(UserInfoManagerErrorTypes.FIND_USER_INFO_FAILED, error)
         }
         if (!userInfo) {
@@ -64,7 +64,7 @@ class DBUserInfoManager {
         const userInfoModel = new this.UserInfoModel(userInfo)
         try {
             await userInfoModel.save()
-        } catch (error) {
+        } catch (error: Error | any) {
             throw new DBUserInfoManagerError(UserInfoManagerErrorTypes.CREATE_USER_INFO_FAILED, error)
         }
     }
@@ -72,7 +72,7 @@ class DBUserInfoManager {
     async createUserInfoIfNeeded(uid: string) {
         try {
             await this.getUserInfo(uid)
-        } catch (error) {
+        } catch (error: DBUserInfoManagerError | any) {
             if (error.code === UserInfoManagerErrorTypes.USER_INFO_NOT_FOUND) {
                 await this.createUserInfo({ id: uid, timeZone: 0 })
             } else {
@@ -88,10 +88,4 @@ interface DBUserInfoManager {
 
 DBUserInfoManager.prototype.UserInfoModel = UserInfoModel
 
-
-test()
-async function test() {
-    const dbUserInfoManager = new DBUserInfoManager()
-    await dbUserInfoManager.createUserInfoIfNeeded('test')
-    console.log(await dbUserInfoManager.getUserInfo('test'))
-}
+export default DBUserInfoManager
