@@ -23,6 +23,17 @@ dotenv.config()
 const fileRootPath = process.env.FILE_ROOT_PATH as string
 
 export const PhotoRouter = () => {
+    /*
+    - 受保護的 API
+        - API List:
+            - [Post] /photo/single
+            - [Post] /photo/multiple
+            - [Get] /photo/single/:path
+        - 方法:
+            - 會在 path 最前面加上使用者的 uid
+                - Ex: /avatar/avatar.jpg -> /:uid/avatar/avatar.jpg
+        
+    */
     photoRouter.post('/single', upload.single('photo'), async (req: Request, res: Response) => {
         /*
         API: /photo/single
@@ -49,7 +60,8 @@ export const PhotoRouter = () => {
             res.status(400).send(failedResponse('Without photo'))
             return
         }
-        const fullPath = pth.join(fileRootPath, path as string)
+        const userFileRootPath = pth.join(fileRootPath, req.uid as string)
+        const fullPath = pth.join(userFileRootPath, path as string)
         name = name as string
         buffer = buffer as Buffer
 
@@ -95,13 +107,39 @@ export const PhotoRouter = () => {
 
         let totalSize = 0
         files.forEach(async (file, index) => {
-            const fullPath = pth.join(fileRootPath, path as string)
+            const userFileRootPath = pth.join(fileRootPath, req.uid as string)
+            const fullPath = pth.join(userFileRootPath, path as string)
             await FileManager.createFolderIfNeeded(fullPath)
             await FileManager.savePhoto(fullPath, names[index], file.buffer)
             totalSize += file.size
         })
 
         res.send(successResponse({ path, names, totalSize }))
+    })
+
+    photoRouter.get('/single/:path(*)', async (req: Request, res: Response) => {
+        /*
+        API: /photo/single/:path
+            Ex: /photo/single/avatar/avatar.jpg
+        Method: GET
+        Description: Get a single photo from the server
+        Response: Buffer
+        */
+        const uid = req.uid as string
+        const path = req.params.path
+
+        if (path == undefined) {
+            res.status(400).send(failedResponse('Without path'))
+            return
+        }
+        const userFileRootPath = pth.join(fileRootPath, uid)
+        const fullPath = pth.join(userFileRootPath, path)
+        try {
+            const buffer = await FileManager.readPhoto(fullPath)
+            res.send(buffer)
+        } catch(error: Error | any) {
+            res.status(500).send(failedResponse(error.message))
+        }
     })
 
     return photoRouter
