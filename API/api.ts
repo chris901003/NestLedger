@@ -11,6 +11,7 @@
 import express, { Request, Response } from 'express'
 import { authVerify } from './auth-verify'
 import { UserRouter } from './user-router'
+import { PhotoRouter } from './photo-router'
 
 class APIManager {
     app: express.Express
@@ -30,8 +31,9 @@ class APIManager {
     #generateAPI() {
         this.app.use(express.json())
         authVerify(this.app)
-        
+
         this.app.use('/user', UserRouter())
+        this.app.use('/photo', PhotoRouter())
     }
 
     #createTestAPI() {

@@ -1,0 +1,25 @@
+/*
+ * =============================================================================
+ * Created by Zephyr-Huang on 2025/02/18.
+ * Copyright © 2025 Zephyr-Huang. All rights reserved.
+ *
+ * Unauthorized copying of this file, via any medium, is strictly prohibited.
+ * Proprietary and confidential.
+ * =============================================================================
+*/
+
+import fs from 'fs-extra'
+import * as pth from 'path'
+
+class FileManager {
+    static async createFolderIfNeeded(path: string) {
+        await fs.ensureDir(path)
+    }
+
+    static async savePhoto(folder: string, name: string, buffer: Buffer) {
+        const savePath = pth.join(folder, name)
+        await fs.writeFile(savePath, buffer)
+    }
+}
+
+export default FileManager
