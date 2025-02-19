@@ -29,5 +29,30 @@ export const UserRouter = () => {
             res.status(500).send(failedResponse(error.code))
         }
     })
+
+    userRouter.get('/get', async (req: Request, res: Response) => {
+        let uid = req.uid as string
+        try {
+            const userInfo = await dbUserInfoManager.getUserInfo(uid)
+            res.status(200).send(successResponse({ "UserInfo": userInfo }))
+        } catch(error: Error | any) {
+            res.status(500).send(failedResponse(error.code))
+        }
+    })
+
+    userRouter.patch('/update', async (req: Request, res: Response) => {
+        let uid = req.uid as string
+        let updateInfo = req.body
+        const updateUserInfo = await dbUserInfoManager.UserInfoModel.findOneAndUpdate(
+            {id: uid}, 
+            updateInfo, 
+            {
+                new: true,
+                runValidators: true
+            }
+        ).lean()
+        res.status(200).send(successResponse({ "UserInfo": updateUserInfo }))
+    })
+
     return userRouter
 }

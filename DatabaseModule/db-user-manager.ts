@@ -34,7 +34,8 @@ class DBUserInfoManagerError extends Error {
 
 const UserInfoSchema: Schema = new Schema({
     id: { type: String, required: true },
-    timeZone: { type: Number, required: true }
+    timeZone: { type: Number, default: 8 },
+    avatar: { type: String, default: '' }
 })
 
 type IUserInfo = InferSchemaType<typeof UserInfoSchema>
@@ -74,7 +75,7 @@ class DBUserInfoManager {
             await this.getUserInfo(uid)
         } catch (error: DBUserInfoManagerError | any) {
             if (error.code === UserInfoManagerErrorTypes.USER_INFO_NOT_FOUND) {
-                await this.createUserInfo({ id: uid, timeZone: 0 })
+                await this.createUserInfo({ id: uid })
             } else {
                 throw error
             }
