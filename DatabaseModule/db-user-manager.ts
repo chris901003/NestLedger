@@ -34,6 +34,7 @@ class DBUserInfoManagerError extends Error {
 
 const UserInfoSchema: Schema = new Schema({
     id: { type: String, required: true },
+    emailAddress: { type: String, default: '' },
     timeZone: { type: Number, default: 8 },
     avatar: { type: String, default: '' }
 })
