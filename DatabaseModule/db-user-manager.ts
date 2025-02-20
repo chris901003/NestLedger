@@ -34,9 +34,11 @@ class DBUserInfoManagerError extends Error {
 
 const UserInfoSchema: Schema = new Schema({
     id: { type: String, required: true },
+    userName: { type: String, default: '' },
     emailAddress: { type: String, default: '' },
+    avatar: { type: String, default: '' },
     timeZone: { type: Number, default: 8 },
-    avatar: { type: String, default: '' }
+    version: { type: Number, default: 1 },
 })
 
 type IUserInfo = InferSchemaType<typeof UserInfoSchema>
