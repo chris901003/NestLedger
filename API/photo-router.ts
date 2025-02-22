@@ -142,5 +142,30 @@ export const PhotoRouter = () => {
         }
     })
 
+    photoRouter.delete('/single/:path(*)', async (req: Request, res: Response) => {
+        /*
+        API: /photo/single/:path
+            Ex: /photo/single/avatar/avatar.jpg
+        Method: DELETE
+        Description: Delete a single photo from the server
+        */
+        const uid = req.uid as string
+        const path = req.params.path
+
+        if (path == undefined) {
+            res.status(400).send(failedResponse('Without path'))
+            return
+        }
+
+        const userFileRootPath = pth.join(fileRootPath, uid)
+        const fullPath = pth.join(userFileRootPath, path)
+        try {
+            await FileManager.deletePhoto(fullPath)
+            res.send(successResponse(''))
+        } catch(error: Error | any) {
+            res.status(500).send(failedResponse(error.message))
+        }
+    })
+
     return photoRouter
 }

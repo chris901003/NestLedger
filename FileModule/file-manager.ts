@@ -32,6 +32,13 @@ class FileManager {
         const buffer = await fs.readFile(path)
         return buffer
     }
+
+    static async deletePhoto(path: string) {
+        if (!fs.existsSync(path)) {
+            throw new Error(FileManagerError.FileNotFound)
+        }
+        await fs.unlink(path)
+    }
 }
 
 export default FileManager
