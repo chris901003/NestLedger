@@ -38,6 +38,7 @@ const UserInfoSchema: Schema = new Schema({
     emailAddress: { type: String, default: '' },
     avatar: { type: String, default: '' },
     timeZone: { type: Number, default: 8 },
+    imageQuality: { type: Number, default: 0.5 },
     version: { type: Number, default: 1 },
 })
 
