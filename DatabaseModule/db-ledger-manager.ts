@@ -9,7 +9,7 @@
 */
 
 import mongoose from './db-connect'
-import { Schema, Document, InferSchemaType } from 'mongoose'
+import { Schema, Document, InferSchemaType, Types } from 'mongoose'
 
 // LedgerManager Error Types
 enum LedgerManagerErrorTypes {
@@ -37,7 +37,7 @@ const LedgerSchema: Schema = new Schema({
     version: { type: Number, default: 1 },
 })
 
-type ILedger = InferSchemaType<typeof LedgerSchema>
+type ILedger = InferSchemaType<typeof LedgerSchema> & { _id: Types.ObjectId }
 type ILedgerDocument = ILedger & Document
 
 const LedgerModel = mongoose.model<ILedgerDocument>('Ledger', LedgerSchema)
@@ -47,7 +47,7 @@ const LedgerModel = mongoose.model<ILedgerDocument>('Ledger', LedgerSchema)
 class DBLedgerManager {
     constructor() { }
 
-    async createLedger(title: string, userId: string, version: number) {
+    async createLedger(title: string, userId: string, version: number): Promise<string> {
         const ledgerModel = new this.LedgerModel({
             title: title,
             userIds: [userId],
@@ -55,7 +55,8 @@ class DBLedgerManager {
             version: version,
         })
         try {
-            await ledgerModel.save()
+            const saveLedger = await ledgerModel.save()
+            return saveLedger._id.toString()
         } catch (error: Error | any) {
             throw new DBLedgerManagerError(LedgerManagerErrorTypes.CREATE_LEDGER_FAILED, error)
         }
