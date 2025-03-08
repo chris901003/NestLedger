@@ -13,6 +13,7 @@ import { authVerify } from './auth-verify'
 import { UserRouter } from './user-router'
 import { PhotoRouter } from './photo-router'
 import { InformationRouter } from './information-router'
+import { LedgerRouter } from './ledger-router'
 
 class APIManager {
     app: express.Express
@@ -36,6 +37,7 @@ class APIManager {
         this.app.use('/user', UserRouter())
         this.app.use('/photo', PhotoRouter())
         this.app.use('/information', InformationRouter())
+        this.app.use('/ledger', LedgerRouter())
     }
 
     #createTestAPI() {
