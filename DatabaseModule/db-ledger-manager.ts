@@ -94,6 +94,14 @@ class DBLedgerManager {
             throw new DBLedgerManagerError(LedgerManagerErrorTypes.LEDGER_UPDATE_FAILED)
         }
     }
+
+    async deleteLedger(ledgerId: string) {
+        try {
+            await this.LedgerModel.findByIdAndDelete(ledgerId)
+        } catch {
+            throw new DBLedgerManagerError(LedgerManagerErrorTypes.LEDGER_NOT_FOUND)
+        }
+    }
 }
 
 interface DBLedgerManager {
