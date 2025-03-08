@@ -28,5 +28,19 @@ export const LedgerRouter = () => {
         }
     })
 
+    ledgerRouter.get('/get', async (req: Request, res: Response) => {
+        let ledgerId = req.query.ledgerId as string | undefined
+        if (ledgerId == undefined) {
+            res.status(400).send(failedResponse('Without ledgerId'))
+        } else {
+            try {
+                const ledger = await dbLedgerManager.getLedger(ledgerId)
+                res.status(200).send(successResponse({ "Ledger": ledger }))
+            } catch(error: Error | any) {
+                res.status(500).send(failedResponse(error.code))
+            }
+        }
+    })
+
     return ledgerRouter
 }

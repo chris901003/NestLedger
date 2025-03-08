@@ -13,7 +13,8 @@ import { Schema, Document, InferSchemaType, Types } from 'mongoose'
 
 // LedgerManager Error Types
 enum LedgerManagerErrorTypes {
-    CREATE_LEDGER_FAILED = 'Failed to create ledger'
+    CREATE_LEDGER_FAILED = 'Failed to create ledger',
+    LEDGER_NOT_FOUND = 'Ledger not found'
 }
 
 class DBLedgerManagerError extends Error {
@@ -59,6 +60,18 @@ class DBLedgerManager {
             return saveLedger._id.toString()
         } catch (error: Error | any) {
             throw new DBLedgerManagerError(LedgerManagerErrorTypes.CREATE_LEDGER_FAILED, error)
+        }
+    }
+
+    async getLedger(ledgerId: string): Promise<ILedger> {
+        try {
+            const ledger = await this.LedgerModel.findById(ledgerId).lean()
+            if (!ledger) {
+                throw new DBLedgerManagerError(LedgerManagerErrorTypes.LEDGER_NOT_FOUND)
+            }
+            return ledger
+        } catch (error: Error | any) {
+            throw new DBLedgerManagerError(LedgerManagerErrorTypes.LEDGER_NOT_FOUND, error)
         }
     }
 }
