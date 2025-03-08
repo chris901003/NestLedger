@@ -35,7 +35,6 @@ class DBLedgerManagerError extends Error {
 const LedgerSchema: Schema = new Schema({
     title: { type: String, required: true },
     userIds: { type: [String], required: true },
-    tagIds: { type: [String], default: [] },
     version: { type: Number, default: 1 },
 })
 
@@ -53,7 +52,6 @@ class DBLedgerManager {
         const ledgerModel = new this.LedgerModel({
             title: title,
             userIds: [userId],
-            tagIds: [],
             version: version,
         })
         try {
