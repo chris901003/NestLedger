@@ -42,5 +42,20 @@ export const LedgerRouter = () => {
         }
     })
 
+    ledgerRouter.patch('/update', async (req: Request, res: Response) => {
+        let ledgerId = req.body.ledgerId as string | undefined
+        let updateInfo = req.body.ledger as any | undefined
+        if (ledgerId == undefined || updateInfo == undefined) {
+            res.status(400).send(failedResponse('Without ledgerId or updateInfo'))
+        } else {
+            try {
+                updateInfo = await dbLedgerManager.updateLedger(ledgerId, updateInfo)
+                res.status(200).send(successResponse({ "Ledger": updateInfo }))
+            } catch(error: Error | any) {
+                res.status(500).send(failedResponse(error.code))
+            }
+        }
+    })
+
     return ledgerRouter
 }

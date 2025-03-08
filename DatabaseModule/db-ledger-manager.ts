@@ -14,7 +14,8 @@ import { Schema, Document, InferSchemaType, Types } from 'mongoose'
 // LedgerManager Error Types
 enum LedgerManagerErrorTypes {
     CREATE_LEDGER_FAILED = 'Failed to create ledger',
-    LEDGER_NOT_FOUND = 'Ledger not found'
+    LEDGER_NOT_FOUND = 'Ledger not found',
+    LEDGER_UPDATE_FAILED = 'Failed to update ledger',
 }
 
 class DBLedgerManagerError extends Error {
@@ -72,6 +73,25 @@ class DBLedgerManager {
             return ledger
         } catch (error: Error | any) {
             throw new DBLedgerManagerError(LedgerManagerErrorTypes.LEDGER_NOT_FOUND, error)
+        }
+    }
+
+    async updateLedger(ledgerId: string, updateInfo: ILedger): Promise<ILedger> {
+        try {
+            const updateLedger = await this.LedgerModel.findByIdAndUpdate(
+                ledgerId,
+                updateInfo,
+                {
+                    new: true,
+                    runValidators: true
+                }
+            ).lean()
+            if (!updateLedger) {
+                throw new DBLedgerManagerError(LedgerManagerErrorTypes.LEDGER_NOT_FOUND)
+            }
+            return updateLedger
+        } catch {
+            throw new DBLedgerManagerError(LedgerManagerErrorTypes.LEDGER_UPDATE_FAILED)
         }
     }
 }
