@@ -69,6 +69,16 @@ class DBTagManager {
             throw new DBTagManagerError(TagManagerErrorTypes.CREATE_TAG_FAILED, error)
         }
     }
+
+    async getTags(ledgerId: string): Promise<ITag[]> {
+        let tags: ITag[] = []
+        try {
+            tags = await this.TagModel.find({ ledgerId: ledgerId }).lean()
+            return tags
+        } catch (error: Error | any) {
+            throw new DBTagManagerError(TagManagerErrorTypes.CREATE_TAG_FAILED, error)
+        }
+    }
 }
 
 interface DBTagManager {

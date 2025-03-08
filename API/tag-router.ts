@@ -55,5 +55,19 @@ export const TagRouter = () => {
         }
     })
 
+    tagRouter.get('/get-by-ledger', async (req: Request, res: Response) => {
+        const ledgerId = req.query.ledgerId as string | undefined
+        if (ledgerId == undefined) {
+            res.status(400).send(failedResponse('Without ledgerId'))
+        } else {
+            try {
+                const tags = await dbTagManager.getTags(ledgerId)
+                res.status(200).send(successResponse({ "Tags": tags }))
+            } catch(error: Error | any) {
+                res.status(500).send(failedResponse(error.code))
+            }
+        }
+    })
+
     return tagRouter
 }
