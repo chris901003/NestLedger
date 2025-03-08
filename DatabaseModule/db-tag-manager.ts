@@ -109,6 +109,14 @@ class DBTagManager {
             throw new DBTagManagerError(TagManagerErrorTypes.TAG_NOT_FOUND, error)
         }
     }
+
+    async deleteTags(ledgerId: string) {
+        try {
+            await this.TagModel.deleteMany({ ledgerId: ledgerId })
+        } catch (error: Error | any) {
+            throw new DBTagManagerError(TagManagerErrorTypes.TAG_NOT_FOUND, error)
+        }
+    }
 }
 
 interface DBTagManager {

@@ -98,5 +98,19 @@ export const TagRouter = () => {
         }
     })
 
+    tagRouter.delete('/delete-by-ledger', async (req: Request, res: Response) => {
+        const ledgerId = req.query.ledgerId as string | undefined
+        if (ledgerId == undefined) {
+            res.status(400).send(failedResponse('Without ledgerId'))
+        } else {
+            try {
+                await dbTagManager.deleteTags(ledgerId)
+                res.status(200).send(successResponse({ "ledgerId": ledgerId }))
+            } catch(error: Error | any) {
+                res.status(500).send(failedResponse(error.code))
+            }
+        }
+    })
+
     return tagRouter
 }
