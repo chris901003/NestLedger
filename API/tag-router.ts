@@ -69,5 +69,20 @@ export const TagRouter = () => {
         }
     })
 
+    tagRouter.patch('/update', async (req: Request, res: Response) => {
+        const tagId = req.body.tagId as string | undefined
+        let updateInfo = req.body.tag as any | undefined
+        if (tagId == undefined || updateInfo == undefined) {
+            res.status(400).send(failedResponse('Without tagId or updateInfo'))
+        } else {
+            try {
+                updateInfo = await dbTagManager.updateTag(tagId, updateInfo)
+                res.status(200).send(successResponse({ "Tag": updateInfo }))
+            } catch(error: Error | any) {
+                res.status(500).send(failedResponse(error.code))
+            }
+        }
+    })
+
     return tagRouter
 }

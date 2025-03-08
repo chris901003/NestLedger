@@ -14,6 +14,8 @@ import { Schema, Document, InferSchemaType, Types } from 'mongoose'
 // TagManager Error Types
 enum TagManagerErrorTypes {
     CREATE_TAG_FAILED = 'Failed to create tag',
+    TAG_NOT_FOUND = 'Tag not found',
+    UPDATE_TAG_FAILED = 'Failed to update tag',
 }
 
 class DBTagManagerError extends Error {
@@ -62,11 +64,11 @@ class DBTagManager {
         try {
             tag = await this.TagModel.findOne({ _id: tagId }).lean()
             if (tag == null) {
-                throw new DBTagManagerError(TagManagerErrorTypes.CREATE_TAG_FAILED)
+                throw new DBTagManagerError(TagManagerErrorTypes.TAG_NOT_FOUND)
             }
             return tag
         } catch (error: Error | any) {
-            throw new DBTagManagerError(TagManagerErrorTypes.CREATE_TAG_FAILED, error)
+            throw new DBTagManagerError(TagManagerErrorTypes.TAG_NOT_FOUND, error)
         }
     }
 
@@ -76,7 +78,27 @@ class DBTagManager {
             tags = await this.TagModel.find({ ledgerId: ledgerId }).lean()
             return tags
         } catch (error: Error | any) {
-            throw new DBTagManagerError(TagManagerErrorTypes.CREATE_TAG_FAILED, error)
+            throw new DBTagManagerError(TagManagerErrorTypes.TAG_NOT_FOUND, error)
+        }
+    }
+
+    async updateTag(tagId: string, updateInfo: ITag): Promise<ITag> {
+        try {
+            const updateTag = await this.TagModel.findByIdAndUpdate
+                (
+                    tagId,
+                    updateInfo,
+                    {
+                        new: true,
+                        runValidators: true
+                    }
+                ).lean()
+            if (!updateTag) {
+                throw new DBTagManagerError(TagManagerErrorTypes.UPDATE_TAG_FAILED)
+            }
+            return updateTag
+        } catch (error: Error | any) {
+            throw new DBTagManagerError(TagManagerErrorTypes.UPDATE_TAG_FAILED, error)
         }
     }
 }
