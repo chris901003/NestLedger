@@ -39,6 +39,7 @@ const UserInfoSchema: Schema = new Schema({
     avatar: { type: String, default: '' },
     timeZone: { type: Number, default: 8 },
     imageQuality: { type: Number, default: 0.5 },
+    ledgerIds: { type: [String], default: [] },
     version: { type: Number, default: 1 },
 })
 
