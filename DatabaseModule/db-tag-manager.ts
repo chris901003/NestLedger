@@ -101,6 +101,14 @@ class DBTagManager {
             throw new DBTagManagerError(TagManagerErrorTypes.UPDATE_TAG_FAILED, error)
         }
     }
+
+    async deleteTag(tagId: string) {
+        try {
+            await this.TagModel.findByIdAndDelete(tagId)
+        } catch (error: Error | any) {
+            throw new DBTagManagerError(TagManagerErrorTypes.TAG_NOT_FOUND, error)
+        }
+    }
 }
 
 interface DBTagManager {

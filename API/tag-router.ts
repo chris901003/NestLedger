@@ -84,5 +84,19 @@ export const TagRouter = () => {
         }
     })
 
+    tagRouter.delete('/delete', async (req: Request, res: Response) => {
+        const tagId = req.query.tagId as string | undefined
+        if (tagId == undefined) {
+            res.status(400).send(failedResponse('Without tagId'))
+        } else {
+            try {
+                await dbTagManager.deleteTag(tagId)
+                res.status(200).send(successResponse({ "tagId": tagId }))
+            } catch(error: Error | any) {
+                res.status(500).send(failedResponse(error.code))
+            }
+        }
+    })
+
     return tagRouter
 }
