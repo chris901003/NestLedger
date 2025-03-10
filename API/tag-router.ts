@@ -62,7 +62,7 @@ export const TagRouter = () => {
         } else {
             try {
                 const tags = await dbTagManager.getTags(ledgerId)
-                res.status(200).send(successResponse({ "Tags": tags }))
+                res.status(200).send(successResponse({ "tags": tags }))
             } catch(error: Error | any) {
                 res.status(500).send(failedResponse(error.code))
             }

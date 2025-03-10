@@ -48,7 +48,7 @@ const LedgerModel = mongoose.model<ILedgerDocument>('Ledger', LedgerSchema)
 class DBLedgerManager {
     constructor() { }
 
-    async createLedger(title: string, userId: string, version: number): Promise<string> {
+    async createLedger(title: string, userId: string, version: number): Promise<ILedger> {
         const ledgerModel = new this.LedgerModel({
             title: title,
             userIds: [userId],
@@ -56,7 +56,7 @@ class DBLedgerManager {
         })
         try {
             const saveLedger = await ledgerModel.save()
-            return saveLedger._id.toString()
+            return saveLedger
         } catch (error: Error | any) {
             throw new DBLedgerManagerError(LedgerManagerErrorTypes.CREATE_LEDGER_FAILED, error)
         }
