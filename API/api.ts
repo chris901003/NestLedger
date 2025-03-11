@@ -15,6 +15,7 @@ import { PhotoRouter } from './photo-router'
 import { InformationRouter } from './information-router'
 import { LedgerRouter } from './ledger-router'
 import { TagRouter } from './tag-router'
+import { TransactionRouter } from './transaction-router'
 
 class APIManager {
     app: express.Express
@@ -40,6 +41,7 @@ class APIManager {
         this.app.use('/information', InformationRouter())
         this.app.use('/ledger', LedgerRouter())
         this.app.use('/tag', TagRouter())
+        this.app.use('/transaction', TransactionRouter())
     }
 
     #createTestAPI() {
