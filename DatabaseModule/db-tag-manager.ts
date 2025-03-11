@@ -72,10 +72,18 @@ class DBTagManager {
         }
     }
 
-    async getTags(ledgerId: string): Promise<ITag[]> {
+    async getTags(ledgerId: string, search: string | undefined, page: number = 0, limit: number = 100): Promise<ITag[]> {
         let tags: ITag[] = []
         try {
-            tags = await this.TagModel.find({ ledgerId: ledgerId }).lean()
+            const query = search ? { ledgerId, label: { $regex: search, $options: 'i' } } : { ledgerId }
+            if (page <= 0) {
+                tags = await this.TagModel.find(query).lean()
+            } else {
+                tags = await this.TagModel.find(query)
+                    .sort({ _id: 1})
+                    .skip((page - 1) * limit)
+                    .limit(limit)
+            }
             return tags
         } catch (error: Error | any) {
             throw new DBTagManagerError(TagManagerErrorTypes.TAG_NOT_FOUND, error)
