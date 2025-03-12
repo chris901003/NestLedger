@@ -64,6 +64,9 @@ export const TransactionRouter = () => {
         const search = req.query.search as string | undefined
         const startDate = req.query.startDate as Date | undefined
         const endDate = req.query.endDate as Date | undefined
+        const tagId = req.query.tagId as string | undefined
+        const type = req.query.type as string | undefined
+        const userId = req.uid as string
         
         if (typeof page === 'string') {
             page = parseInt(page)
@@ -81,11 +84,43 @@ export const TransactionRouter = () => {
                     search, 
                     startDate,
                     endDate,
+                    tagId,
+                    type,
+                    userId,
                     page, 
                     limit
                 )
                 res.status(200).send(successResponse({ "transactions": transactions }))
             } catch(error: Error | any) {
+                res.status(500).send(failedResponse(error.code))
+            }
+        }
+    })
+
+    transactionRouter.patch('/update', async (req: Request, res: Response) => {
+        const transactionId = req.body.transactionId as string | undefined
+        const data = req.body.transaction as any | undefined
+        if (transactionId == undefined || data == undefined) {
+            res.send(failedResponse('Without transactionId or data'))
+        } else {
+            try {
+                const transaction = await dbTransactionManager.updateTransaction(transactionId, data)
+                res.status(200).send(successResponse({ "transaction": transaction }))
+            } catch (error: Error | any) {
+                res.status(500).send(failedResponse(error.code))
+            }
+        }
+    })
+
+    transactionRouter.delete('/delete', async (req: Request, res: Response) => {
+        const transactionId = req.body.transactionId as string | undefined
+        if (transactionId == undefined) {
+            res.status(400).send(failedResponse('Without transactionId'))
+        } else {
+            try {
+                await dbTransactionManager.deleteTransaction(transactionId)
+                res.status(200).send(successResponse({}))
+            } catch (error: Error | any) {
                 res.status(500).send(failedResponse(error.code))
             }
         }

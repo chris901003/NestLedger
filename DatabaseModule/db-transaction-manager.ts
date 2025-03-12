@@ -82,15 +82,19 @@ class DBTransactionManager {
         search: string | undefined, 
         startDate: Date | undefined, 
         endDate: Date | undefined,
+        tagId: string | undefined,
+        type: string | undefined,
+        userId: string | undefined,
         page: number = 0, 
         limit: number = 100
     ): Promise<ITransaction[]> {
         let transactions: ITransaction[] = []
         try {
             let query: any = { ledgerId }
-            if (search) {
-                query.title = { $regex: search, $options: 'i' }
-            }
+            if (search) { query.title = { $regex: search, $options: 'i' } }
+            if (tagId) { query.tagId = tagId }
+            if (type) { query.type = type }
+            if (userId) { query.userId = userId }
             let dateFilter: any = {}
             if (startDate) dateFilter.$gte = startDate
             if (endDate) dateFilter.$lte = endDate
@@ -109,6 +113,29 @@ class DBTransactionManager {
         } catch (error: Error | any) {
             throw new DBTransactionManagerError(TransactionManagerErrorTypes.TRANSACTION_NOT_FOUND, error)
         }
+    }
+
+    async updateTransaction(transactionId: string, data: ITransaction): Promise<ITransaction> {
+        try {
+            const transaction = await TransactionModel
+                .findOneAndUpdate({ _id: transactionId }, data, { new: true, runValidators: true })
+                .lean()
+            if (transaction == null) {
+                throw new DBTransactionManagerError(TransactionManagerErrorTypes.UPDATE_TRANSACTION_FAILED)
+            }
+            return transaction
+        } catch (error: Error | any) {
+            throw new DBTransactionManagerError(TransactionManagerErrorTypes.UPDATE_TRANSACTION_FAILED, error)
+        }
+    }
+
+    async deleteTransaction(transactionId: string): Promise<string> {
+        try {
+            await TransactionModel.findByIdAndDelete(transactionId)
+        } catch (error: Error | any) {
+            throw new DBTransactionManagerError(TransactionManagerErrorTypes.TRANSACTION_NOT_FOUND, error)
+        }
+        return transactionId
     }
 }
 
