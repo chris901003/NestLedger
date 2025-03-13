@@ -49,11 +49,11 @@ const TagModel = mongoose.model<ITagDocument>('Tag', TagSchema)
 class DBTagManager {
     constructor() { }
 
-    async createTag(data: ITag): Promise<string> {
+    async createTag(data: ITag): Promise<ITag> {
         const tagModel = new this.TagModel(data)
         try {
             const saveTag = await tagModel.save()
-            return saveTag._id.toString()
+            return saveTag
         } catch (error: Error | any) {
             throw new DBTagManagerError(TagManagerErrorTypes.CREATE_TAG_FAILED, error)
         }

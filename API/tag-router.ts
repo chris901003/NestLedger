@@ -27,14 +27,14 @@ export const TagRouter = () => {
             res.status(400).send(failedResponse('Without label or color or ledgerId or version'))
         } else {
             try {
-                const tagId = await dbTagManager.createTag({ 
+                const tag = await dbTagManager.createTag({ 
                     label, 
                     color, 
                     ledgerId, 
                     version, 
                     _id: new Types.ObjectId() 
                 })
-                res.status(200).send(successResponse({ "tagId": tagId }))
+                res.status(200).send(successResponse({ "Tag": tag }))
             } catch(error: Error | any) {
                 res.status(500).send(failedResponse(error.code))
             }

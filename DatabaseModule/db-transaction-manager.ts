@@ -33,7 +33,7 @@ class DBTransactionManagerError extends Error {
 // Define the data structure of the transaction
 
 const TransactionSchema: Schema = new Schema({
-    title: { type: String, required: true },
+    title: { type: String, required: false },
     note: { type: String, required: false },
     money: { type: Number, required: true },
     date: { type: Date, required: true },
