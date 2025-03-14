@@ -66,13 +66,17 @@ export const TransactionRouter = () => {
         const endDate = req.query.endDate as Date | undefined
         const tagId = req.query.tagId as string | undefined
         const type = req.query.type as string | undefined
-        const userId = req.uid as string
+        const userId = req.query.userId as string
+        let sortedOrder = req.query.sortedOrder as string | undefined | number
         
         if (typeof page === 'string') {
             page = parseInt(page)
         }
         if (typeof limit === 'string') {
             limit = parseInt(limit)
+        }
+        if (typeof sortedOrder === 'string') {
+            sortedOrder = parseInt(sortedOrder)
         }
 
         if (ledgerId == undefined) {
@@ -87,6 +91,7 @@ export const TransactionRouter = () => {
                     tagId,
                     type,
                     userId,
+                    sortedOrder,
                     page, 
                     limit
                 )

@@ -85,7 +85,8 @@ class DBTransactionManager {
         tagId: string | undefined,
         type: string | undefined,
         userId: string | undefined,
-        page: number = 0, 
+        sortedOrder: number = 1,
+        page: number = 1, 
         limit: number = 100
     ): Promise<ITransaction[]> {
         let transactions: ITransaction[] = []
@@ -100,15 +101,11 @@ class DBTransactionManager {
             if (endDate) dateFilter.$lte = endDate
             if (Object.keys(dateFilter).length > 0) query.date = dateFilter
             
-            if (page <= 0) {
-                transactions = await TransactionModel.find(query).lean()
-            } else {
-                transactions = await TransactionModel.find(query)
-                    .sort({ _id: 1 })
-                    .skip((page - 1) * limit)
-                    .limit(limit)
-                    .lean()
-            }
+            transactions = await TransactionModel.find(query)
+                .sort({ date: sortedOrder === 1 ? 1 : -1 })
+                .skip((page - 1) * limit)
+                .limit(limit)
+                .lean()
             return transactions
         } catch (error: Error | any) {
             throw new DBTransactionManagerError(TransactionManagerErrorTypes.TRANSACTION_NOT_FOUND, error)
