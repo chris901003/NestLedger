@@ -86,6 +86,16 @@ class DBUserInfoManager {
             }
         }
     }
+
+    async getMultipleUserInfo(uids: string[]): Promise<IUserInfo[]> {
+        let userInfos: IUserInfo[] = []
+        try {
+            userInfos = await this.UserInfoModel.find({ id: { $in: uids } }).lean()
+        } catch {
+            throw new DBUserInfoManagerError(UserInfoManagerErrorTypes.FIND_USER_INFO_FAILED)
+        }
+        return userInfos
+    }
 }
 
 interface DBUserInfoManager {

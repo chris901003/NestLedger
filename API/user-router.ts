@@ -57,6 +57,22 @@ export const UserRouter = () => {
         res.status(200).send(successResponse({ "UserInfo": updateUserInfo }))
     })
 
+    userRouter.post('/get-multiple-user-info', async (req: Request, res: Response) => {
+        let targetUids = req.body.uids as string[] | undefined
+
+        if (targetUids == undefined) {
+            res.status(400).send(failedResponse('Without targetUids'))
+            return
+        } else {
+            try {
+                const userInfos = await dbUserInfoManager.getMultipleUserInfo(targetUids)
+                res.send(userInfos)
+            } catch {
+                res.status(500).send(failedResponse('Failed to get user infos'))
+            }
+        }
+    })
+
     userRouter.get('/get-avatar', async (req: Request, res: Response) => {
         let targetUid = req.query.uid as string | undefined
 
