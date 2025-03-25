@@ -22,7 +22,7 @@ export const LedgerRouter = () => {
         let version = req.body.version
         try {
             const ledger = await dbLedgerManager.createLedger(title, userId, version)
-            res.status(200).send(successResponse({ "ledger": ledger }))
+            res.status(200).send(successResponse({ "Ledger": ledger }))
         } catch(error: Error | any) {
             res.status(500).send(failedResponse(error.code))
         }

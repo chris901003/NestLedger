@@ -8,12 +8,15 @@
  * =============================================================================
 */
 
+import * as pth from 'path'
 import express, { Request, Response } from 'express'
 import { successResponse, failedResponse } from './common-response'
 import DBUserInfoManager from '../DatabaseModule/db-user-manager'
+import FileManager from 'FileModule/file-manager'
 
 const userRouter = express.Router()
 const dbUserInfoManager = new DBUserInfoManager()
+const fileRootPath = process.env.FILE_ROOT_PATH as string
 
 export const UserRouter = () => {
     userRouter.get('/login', async (req: Request, res: Response) => {
@@ -52,6 +55,26 @@ export const UserRouter = () => {
             }
         ).lean()
         res.status(200).send(successResponse({ "UserInfo": updateUserInfo }))
+    })
+
+    userRouter.get('/get-avatar', async (req: Request, res: Response) => {
+        let targetUid = req.query.uid as string | undefined
+
+        if (targetUid == undefined) {
+            res.status(400).send(failedResponse('Without targetUid'))
+            return
+        } else {
+            try {
+                const userInfo = await dbUserInfoManager.getUserInfo(targetUid)
+                const avatarPath = userInfo.avatar as string
+                const userFileRootPath = pth.join(fileRootPath, targetUid)
+                const fullPath = pth.join(userFileRootPath, avatarPath)
+                const avatar = await FileManager.readPhoto(fullPath)
+                res.send(avatar)
+            } catch {
+                res.status(500).send(failedResponse('Failed to get avatar'))
+            }
+        }
     })
 
     return userRouter
