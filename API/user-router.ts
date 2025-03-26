@@ -66,7 +66,7 @@ export const UserRouter = () => {
         } else {
             try {
                 const userInfos = await dbUserInfoManager.getMultipleUserInfo(targetUids)
-                res.send(userInfos)
+                res.send(successResponse({ "userInfos": userInfos }))
             } catch {
                 res.status(500).send(failedResponse('Failed to get user infos'))
             }
