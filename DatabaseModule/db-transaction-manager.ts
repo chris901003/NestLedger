@@ -10,6 +10,7 @@
 
 import mongoose from './db-connect'
 import { Schema, Document, InferSchemaType, Types } from 'mongoose'
+import DBLedgerManager from './db-ledger-manager'
 
 // TransactionManager Error Types
 enum TransactionManagerErrorTypes {
@@ -52,13 +53,22 @@ const TransactionModel = mongoose.model<ITransactionDocument>('Transaction', Tra
 // Define the class to manage the transaction in the database
 
 class DBTransactionManager {
-    constructor() { }
+    constructor(private dbLedgerManager: DBLedgerManager=new DBLedgerManager()) { }
 
     async createTransaction(data: ITransaction): Promise<ITransaction> {
         const transactionModel = new TransactionModel(data)
         try {
-            const saveTransaction = await transactionModel.save()
-            return saveTransaction
+            const session = await mongoose.startSession()
+            const transaction = await session.withTransaction(async () => {
+                const saveTransaction = await transactionModel.save()
+                if (saveTransaction.type === 'income') {
+                    await this.dbLedgerManager.incrementTotalIncome(data.ledgerId as string, data.money as number)
+                } else {
+                    await this.dbLedgerManager.incrementTotalExpense(data.ledgerId as string, data.money as number)
+                }
+                return saveTransaction
+            })
+            return transaction
         } catch (error: Error | any) {
             throw new DBTransactionManagerError(TransactionManagerErrorTypes.CREATE_TRANSACTION_FAILED, error)
         }
@@ -114,12 +124,27 @@ class DBTransactionManager {
 
     async updateTransaction(transactionId: string, data: ITransaction): Promise<ITransaction> {
         try {
-            const transaction = await TransactionModel
+            const session = await mongoose.startSession()
+            const transaction = await session.withTransaction(async () => {
+                const oldTransaction = await TransactionModel.findOne({ _id: transactionId }).lean()
+                if (oldTransaction == null) {
+                    throw new DBTransactionManagerError(TransactionManagerErrorTypes.TRANSACTION_NOT_FOUND)
+                }
+                const diff = (oldTransaction.money as number) - (data.money as number)
+                const ledgerId = oldTransaction.ledgerId as string
+                if (oldTransaction.type === 'income') {
+                    await this.dbLedgerManager.incrementTotalIncome(ledgerId, -diff)
+                } else {
+                    await this.dbLedgerManager.incrementTotalExpense(ledgerId,  -diff)
+                }
+                const transaction = await TransactionModel
                 .findOneAndUpdate({ _id: transactionId }, data, { new: true, runValidators: true })
                 .lean()
-            if (transaction == null) {
-                throw new DBTransactionManagerError(TransactionManagerErrorTypes.UPDATE_TRANSACTION_FAILED)
-            }
+                if (transaction == null) {
+                    throw new DBTransactionManagerError(TransactionManagerErrorTypes.UPDATE_TRANSACTION_FAILED)
+                }
+                return transaction
+            })
             return transaction
         } catch (error: Error | any) {
             throw new DBTransactionManagerError(TransactionManagerErrorTypes.UPDATE_TRANSACTION_FAILED, error)
@@ -128,7 +153,20 @@ class DBTransactionManager {
 
     async deleteTransaction(transactionId: string): Promise<string> {
         try {
-            await TransactionModel.findByIdAndDelete(transactionId)
+            const session = await mongoose.startSession()
+            await session.withTransaction(async () => {
+                const transaction = await TransactionModel.findOne({ _id: transactionId }).lean()
+                if (transaction == null) {
+                    throw new DBTransactionManagerError(TransactionManagerErrorTypes.TRANSACTION_NOT_FOUND)
+                }
+                const ledgerId = transaction.ledgerId as string
+                if (transaction.type === 'income') {
+                    await this.dbLedgerManager.incrementTotalIncome(ledgerId, -(transaction.money as number))
+                } else {
+                    await this.dbLedgerManager.incrementTotalExpense(ledgerId, -(transaction.money as number))
+                }
+                await TransactionModel.findByIdAndDelete(transactionId)
+            })
         } catch (error: Error | any) {
             throw new DBTransactionManagerError(TransactionManagerErrorTypes.TRANSACTION_NOT_FOUND, error)
         }

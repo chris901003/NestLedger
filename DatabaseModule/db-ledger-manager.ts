@@ -35,6 +35,8 @@ class DBLedgerManagerError extends Error {
 const LedgerSchema: Schema = new Schema({
     title: { type: String, required: true },
     userIds: { type: [String], required: true },
+    totalIncome: { type: Number, default: 0 },
+    totalExpense: { type: Number, default: 0 },
     version: { type: Number, default: 1 },
 })
 
@@ -88,6 +90,28 @@ class DBLedgerManager {
                 throw new DBLedgerManagerError(LedgerManagerErrorTypes.LEDGER_NOT_FOUND)
             }
             return updateLedger
+        } catch {
+            throw new DBLedgerManagerError(LedgerManagerErrorTypes.LEDGER_UPDATE_FAILED)
+        }
+    }
+
+    async incrementTotalIncome(ledgerId: string, money: number) {
+        try {
+            await this.LedgerModel.findByIdAndUpdate(
+                ledgerId,
+                { $inc: { totalIncome: money } }
+            )
+        } catch {
+            throw new DBLedgerManagerError(LedgerManagerErrorTypes.LEDGER_UPDATE_FAILED)
+        }
+    }
+
+    async incrementTotalExpense(ledgerId: string, money: number) {
+        try {
+            await this.LedgerModel.findByIdAndUpdate(
+                ledgerId,
+                { $inc: { totalExpense: money } }
+            )
         } catch {
             throw new DBLedgerManagerError(LedgerManagerErrorTypes.LEDGER_UPDATE_FAILED)
         }

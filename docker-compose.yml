@@ -3,7 +3,7 @@ services:
     image: mongo:6.0.4
     container_name: NestLedgerMongoDB
     ports:
-      - "27018:27017"
+      - "27017:27017"
     networks:
       - ngnix_network
     volumes:
