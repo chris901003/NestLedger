@@ -130,12 +130,16 @@ class DBTransactionManager {
                 if (oldTransaction == null) {
                     throw new DBTransactionManagerError(TransactionManagerErrorTypes.TRANSACTION_NOT_FOUND)
                 }
-                const diff = (oldTransaction.money as number) - (data.money as number)
                 const ledgerId = oldTransaction.ledgerId as string
-                if (oldTransaction.type === 'income') {
-                    await this.dbLedgerManager.incrementTotalIncome(ledgerId, -diff)
+                if (oldTransaction.type == 'income') {
+                    await this.dbLedgerManager.incrementTotalIncome(ledgerId, -oldTransaction.money as number)
                 } else {
-                    await this.dbLedgerManager.incrementTotalExpense(ledgerId,  -diff)
+                    await this.dbLedgerManager.incrementTotalExpense(ledgerId, -oldTransaction.money as number)
+                }
+                if (data.type == 'income') {
+                    await this.dbLedgerManager.incrementTotalIncome(ledgerId, data.money as number)
+                } else {
+                    await this.dbLedgerManager.incrementTotalExpense(ledgerId, data.money as number)
                 }
                 const transaction = await TransactionModel
                 .findOneAndUpdate({ _id: transactionId }, data, { new: true, runValidators: true })
