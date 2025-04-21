@@ -10,12 +10,14 @@
 
 import mongoose from './db-connect'
 import { Schema, Document, InferSchemaType, Types } from 'mongoose'
+import DBTransactionManager from './db-transaction-manager'
 
 // TagManager Error Types
 enum TagManagerErrorTypes {
     CREATE_TAG_FAILED = 'Failed to create tag',
     TAG_NOT_FOUND = 'Tag not found',
     UPDATE_TAG_FAILED = 'Failed to update tag',
+    TAG_STILL_USED = 'Tag still used in transaction',
 }
 
 class DBTagManagerError extends Error {
@@ -112,8 +114,24 @@ class DBTagManager {
 
     async deleteTag(tagId: string) {
         try {
+            let tag = await this.TagModel.findOne({ _id: tagId }).lean()
+            if (tag == null) {
+                throw new DBTagManagerError(TagManagerErrorTypes.TAG_NOT_FOUND)
+            }
+            // Check if the tag is used in any transaction
+            // If it is used, do not delete it
+            let transactionManager = new DBTransactionManager()
+            let transactions = await transactionManager.getTransactionByLedger(
+                tag.ledgerId as string, undefined, undefined, undefined, tagId, undefined, undefined
+            )
+            if (transactions.length > 0) {
+                throw new DBTagManagerError(TagManagerErrorTypes.TAG_STILL_USED)
+            }
             await this.TagModel.findByIdAndDelete(tagId)
         } catch (error: Error | any) {
+            if (error instanceof DBTagManagerError) {
+                throw error
+            }
             throw new DBTagManagerError(TagManagerErrorTypes.TAG_NOT_FOUND, error)
         }
     }
