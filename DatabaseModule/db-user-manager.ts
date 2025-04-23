@@ -87,6 +87,18 @@ class DBUserInfoManager {
         }
     }
 
+    async getUserInfoByEmail(email: string): Promise<IUserInfo> {
+        try {
+            const userInfo = await this.UserInfoModel.findOne({ emailAddress: email }).lean()
+            if (!userInfo) {
+                throw new DBUserInfoManagerError(UserInfoManagerErrorTypes.USER_INFO_NOT_FOUND)
+            }
+            return userInfo
+        } catch (error: Error | any) {
+            throw new DBUserInfoManagerError(UserInfoManagerErrorTypes.FIND_USER_INFO_FAILED, error)
+        }
+    }
+
     async getMultipleUserInfo(uids: string[]): Promise<IUserInfo[]> {
         let userInfos: IUserInfo[] = []
         try {

@@ -57,6 +57,22 @@ export const UserRouter = () => {
         res.status(200).send(successResponse({ "UserInfo": updateUserInfo }))
     })
 
+    userRouter.get('/get-user-by-email', async (req: Request, res: Response) => {
+        let email = req.query.email as string | undefined
+
+        if (email == undefined) {
+            res.status(400).send(failedResponse('Without email'))
+            return
+        } else {
+            try {
+                const userInfo = await dbUserInfoManager.getUserInfoByEmail(email)
+                res.send(successResponse({ "userInfo": userInfo }))
+            } catch {
+                res.status(500).send(failedResponse('Failed to get user info'))
+            }
+        }
+    })
+
     userRouter.post('/get-multiple-user-info', async (req: Request, res: Response) => {
         let targetUids = req.body.uids as string[] | undefined
 
