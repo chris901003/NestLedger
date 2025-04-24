@@ -15,6 +15,9 @@ import DBLedgerManager from './db-ledger-manager'
 // LedgerInviteManager Error Types
 enum LedgerInviteManagerErrorTypes {
     CREATE_LEDGER_INVITE_FAILED = 'Failed to create ledger invite',
+    INVITE_ALREADY_EXISTS = 'Invite already exists',
+    LEDGER_NOT_FOUND = 'Ledger not found',
+    MEMBER_ALREADY_EXISTS = 'Member already exists',
     INVALID_GET_LEDGER_INVITE = 'Invalid get ledger invite',
     FAILED_TO_GET_LEDGER_INVITE = 'Failed to get ledger invite',
     FAILED_TO_DELETE_LEDGER_INVITE = 'Failed to delete ledger invite',
@@ -52,9 +55,28 @@ class DBLedgerInviteManager {
     async createLedgerInvite(data: ILedgerInvite): Promise<ILedgerInvite> {
         const ledgerInviteModel = new LedgerInviteModel(data)
         try {
+            const ledgerData = await this.dbLedgerManager.getLedger(data.ledgerId as string)
+            if (!ledgerData) {
+                throw new DBLedgerInviteManagerError(LedgerInviteManagerErrorTypes.LEDGER_NOT_FOUND)
+            }
+            const userIds = ledgerData.userIds as string[]
+            if (userIds.includes(data.receiveUserId as string)) {
+                throw new DBLedgerInviteManagerError(LedgerInviteManagerErrorTypes.MEMBER_ALREADY_EXISTS)
+            }
+            const existingInvite = await LedgerInviteModel.findOne({
+                ledgerId: data.ledgerId,
+                sendUserId: data.sendUserId,
+                receiveUserId: data.receiveUserId,
+            })
+            if (existingInvite) {
+                throw new DBLedgerInviteManagerError(LedgerInviteManagerErrorTypes.INVITE_ALREADY_EXISTS)
+            }
             const ledgerInvite = await ledgerInviteModel.save()
             return ledgerInvite
         } catch (error: any) {
+            if (error instanceof DBLedgerInviteManagerError) {
+                throw error
+            }
             throw new DBLedgerInviteManagerError(LedgerInviteManagerErrorTypes.CREATE_LEDGER_INVITE_FAILED, error)
         }
     }

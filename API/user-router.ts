@@ -66,7 +66,7 @@ export const UserRouter = () => {
         } else {
             try {
                 const userInfo = await dbUserInfoManager.getUserInfoByEmail(email)
-                res.send(successResponse({ "userInfo": userInfo }))
+                res.status(200).send(successResponse({ "UserInfo": userInfo }))
             } catch {
                 res.status(500).send(failedResponse('Failed to get user info'))
             }
