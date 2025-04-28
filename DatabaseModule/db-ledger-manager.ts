@@ -124,6 +124,28 @@ class DBLedgerManager {
             throw new DBLedgerManagerError(LedgerManagerErrorTypes.LEDGER_NOT_FOUND)
         }
     }
+
+    async deleteLedgerMember(ledgerId: string, userId: string): Promise<ILedger> {
+        try {
+            let ledger = await this.LedgerModel.findById(ledgerId).lean()
+            if (!ledger) {
+                throw new DBLedgerManagerError(LedgerManagerErrorTypes.LEDGER_NOT_FOUND)
+            }
+            let userIds = ledger.userIds as string[]
+            userIds = userIds.filter((id) => id !== userId)
+            await this.LedgerModel.findByIdAndUpdate(
+                ledgerId,
+                { userIds: userIds }
+            )
+            const newLedger = await this.LedgerModel.findById(ledgerId).lean()
+            if (!newLedger) {
+                throw new DBLedgerManagerError(LedgerManagerErrorTypes.LEDGER_NOT_FOUND)
+            }
+            return newLedger
+        } catch (error: Error | any) {
+            throw new DBLedgerManagerError(LedgerManagerErrorTypes.LEDGER_NOT_FOUND, error)
+        }
+    }
 }
 
 interface DBLedgerManager {

@@ -71,5 +71,20 @@ export const LedgerRouter = () => {
         }
     })
 
+    ledgerRouter.delete('/delete-ledger-member', async (req: Request, res: Response) => {
+        let userId = req.query.userId as string | undefined
+        let ledgerId = req.query.ledgerId as string | undefined
+        if (userId == undefined || ledgerId == undefined) {
+            res.status(400).send(failedResponse('Without userId or ledgerId'))
+        } else {
+            try {
+                const ledger = await dbLedgerManager.deleteLedgerMember(ledgerId, userId)
+                res.status(200).send(successResponse({ "Ledger": ledger }))
+            } catch(error: Error | any) {
+                res.status(500).send(failedResponse(error.code))
+            }
+        }
+    })
+
     return ledgerRouter
 }
