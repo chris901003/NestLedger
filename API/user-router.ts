@@ -73,6 +73,22 @@ export const UserRouter = () => {
         }
     })
 
+    userRouter.get('/get-user-by-uid', async (req: Request, res: Response) => {
+        let uid = req.query.uid as string | undefined
+
+        if (uid == undefined) {
+            res.status(400).send(failedResponse('Without uid'))
+            return
+        } else {
+            try {
+                const userInfo = await dbUserInfoManager.getUserInfo(uid)
+                res.status(200).send(successResponse({ "UserInfo": userInfo }))
+            } catch {
+                res.status(500).send(failedResponse('Failed to get user info'))
+            }
+        }
+    })
+
     userRouter.post('/get-multiple-user-info', async (req: Request, res: Response) => {
         let targetUids = req.body.uids as string[] | undefined
 
