@@ -48,7 +48,8 @@ export const LedgerInviteRouter = () => {
 
     ledgerInviteRouter.delete('/delete', async (req: Request, res: Response) => {
         let ledgerInviteId = req.query.ledgerInviteId as string | undefined
-        let accept = req.query.accept as boolean | undefined
+        let acceptStr = req.query.accept as string | undefined
+        const accept = acceptStr === 'true' ? true : false
         if (ledgerInviteId == undefined || accept == undefined) {
             res.status(400).send(failedResponse('Without ledgerInviteId'))
         } else {
