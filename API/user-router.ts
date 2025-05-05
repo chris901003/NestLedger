@@ -125,5 +125,21 @@ export const UserRouter = () => {
         }
     })
 
+    userRouter.delete('/delete', async (req: Request, res: Response) => {
+        let uid = req.query.uid as string | undefined
+
+        if (uid == undefined) {
+            res.status(400).send(failedResponse('Without uid'))
+            return
+        } else {
+            try {
+                await dbUserInfoManager.deleteUserInfo(uid)
+                res.status(200).send(successResponse({ "uid": uid }))
+            } catch {
+                res.status(500).send(failedResponse('Failed to delete user'))
+            }
+        }
+    })
+
     return userRouter
 }

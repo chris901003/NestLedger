@@ -40,6 +40,7 @@ const UserInfoSchema: Schema = new Schema({
     timeZone: { type: Number, default: 8 },
     imageQuality: { type: Number, default: 0.5 },
     ledgerIds: { type: [String], default: [] },
+    isDelete: { type: Boolean, default: false },
     version: { type: Number, default: 1 },
 })
 
@@ -107,6 +108,26 @@ class DBUserInfoManager {
             throw new DBUserInfoManagerError(UserInfoManagerErrorTypes.FIND_USER_INFO_FAILED)
         }
         return userInfos
+    }
+
+    async deleteUserInfo(uid: string) {
+        try {
+            let userInfo = await this.UserInfoModel.findOne({ id: uid }).lean()
+            if (!userInfo) {
+                throw new DBUserInfoManagerError(UserInfoManagerErrorTypes.USER_INFO_NOT_FOUND)
+            }
+            userInfo.isDelete = true
+            await this.UserInfoModel.findOneAndUpdate(
+                { id: uid },
+                userInfo,
+                {
+                    new: true,
+                    runValidators: true
+                }
+            ).lean()
+        } catch (error: Error | any) {
+            throw new DBUserInfoManagerError(UserInfoManagerErrorTypes.FIND_USER_INFO_FAILED, error)
+        }
     }
 }
 
